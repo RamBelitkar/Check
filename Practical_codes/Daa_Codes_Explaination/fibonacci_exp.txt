@@ -1,0 +1,153 @@
+====================================================================
+SPPU PRACTICAL EXAM CHEAT SHEET: FIBONACCI (ITERATIVE VS RECURSIVE)
+====================================================================
+
+--------------------------------------------------------------------
+1. PROBLEM STATEMENT COMPLIANCE: 80%
+--------------------------------------------------------------------
+* What matches (80%): 
+  - Successfully implements both non-recursive (iterative) and recursive programs.
+  - Calculates Fibonacci numbers accurately with dynamic user input.
+  - Measures execution time using `time.perf_counter()`.
+* What is missing (20%): 
+  - The problem statement asks to "analyze time and space complexity". While the code measures execution time, formal theoretical complexity analysis (Big-O notation for time and space) is not explicitly written in the comments or documentation.
+
+--------------------------------------------------------------------
+2. SAMPLE INPUT AND OUTPUT
+--------------------------------------------------------------------
+Input:
+  Enter a non-negative integer for n: 10
+
+Output:
+  === Fibonacci Calculator (Iterative vs. Recursive) ===
+
+  Calculating for n = 10...
+
+  Iterative Result: 55
+  Iterative Time:   0.00000140 seconds
+
+  Recursive Result: 55
+  Recursive Time:   0.00001850 seconds
+
+--------------------------------------------------------------------
+3. COMPLETE CODE EXPLANATION
+--------------------------------------------------------------------
+1. import time:
+   - Imports Python's time module to use `time.perf_counter()`, which provides a high-resolution clock to measure precise execution time.
+
+2. fibonacci_recursive(n):
+   - Uses a top-down recursive approach based on the mathematical definition: F(n) = F(n-1) + F(n-2).
+   - Base Cases: If n <= 0 returns 0; if n == 1 returns 1.
+   - Time Complexity: O(2^n) - Exponential, because it recalculates the same values multiple times.
+   - Space Complexity: O(n) - Due to the call stack depth growing up to n.
+
+3. fibonacci_iterative(n):
+   - Uses a bottom-up iterative loop approach.
+   - Base Cases: Handles n <= 0 and n == 1 immediately.
+   - Loop Logic: Keeps track of the last two numbers (`a` and `b`), updating them in a loop from 2 up to n.
+   - Time Complexity: O(n) - Linear time, runs a single loop n times.
+   - Space Complexity: O(1) - Constant space, uses only a few variables (`a`, `b`) regardless of n.
+
+4. main():
+   - Handles user input securely inside a `try-except` block to catch non-integer inputs or negative values.
+   - Measures and compares execution times for both methods.
+   - Includes a safety check (`if n > 35`) to prevent the exponential recursive function from freezing or crashing the terminal due to excessive computation time.
+
+--------------------------------------------------------------------
+4. SPPU ORAL / VIVA QUESTIONS & ANSWERS
+--------------------------------------------------------------------
+
+Q1: What is the time complexity of the recursive Fibonacci approach?
+Ans: O(2^n) (Exponential time complexity) because each call branches into two additional recursive calls, forming a binary recursion tree.
+
+Q2: Why is recursion so slow for larger values of n?
+Ans: Due to overlapping subproblems and redundant calculations. For example, computing F(5) computes F(3) multiple times.
+
+Q3: What is the space complexity of both approaches?
+Ans: 
+- Iterative: O(1) [Constant space, uses fixed variables].
+- Recursive: O(n) [Linear space required for the function call stack].
+
+Q4: What is the purpose of `time.perf_counter()` in this code?
+Ans: It provides a clock with the highest available resolution to measure short execution durations accurately for performance comparison.
+
+Q5: How can you optimize the recursive approach?
+Ans: By using "Memoization" (storing previously calculated results in a cache/dictionary) or switching to Dynamic Programming, which reduces time complexity to O(n).
+
+--------------------------------------------------------------------
+5. CLEAN PYTHON CODE (Fixed & Ready to Run)
+--------------------------------------------------------------------
+import time
+
+
+def fibonacci_recursive(n):
+    """Calculates the n-th Fibonacci number using recursion."""
+    if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+    else:
+        return fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2)
+
+
+def fibonacci_iterative(n):
+    """Calculates the n-th Fibonacci number using iteration (non-recursive)."""
+    if n <= 0:
+        return 0
+    elif n == 1:
+        return 1
+
+    a, b = 0, 1
+    for _ in range(2, n + 1):
+        a, b = b, a + b
+    return b
+
+
+def main():
+    print("=== Fibonacci Calculator (Iterative vs. Recursive) ===")
+    try:
+        user_input = input("Enter a non-negative integer for n: ")
+        n = int(user_input)
+
+        if n < 0:
+            print("Error: Please enter a number greater than or equal to 0.")
+            return
+
+        print(f"\nCalculating for n = {n}...\n")
+
+        # Iterative Execution
+        start_time = time.perf_counter()
+        result_iterative = fibonacci_iterative(n)
+        end_time = time.perf_counter()
+
+        print(f"Iterative Result: {result_iterative}")
+        print(f"Iterative Time:   {(end_time - start_time):.8f} seconds\n")
+
+        # Warning for high values in recursion
+        if n > 35:
+            print(
+                "⚠️ Warning: n > 35 will cause the recursive approach to run very slowly (O(2^n) complexity)."
+            )
+            choice = (
+                input("Do you still want to run the recursive method? (y/n): ")
+                .strip()
+                .lower()
+            )
+            if choice != "y":
+                print("Skipping recursive method.")
+                return
+
+        # Recursive Execution
+        start_time = time.perf_counter()
+        result_recursive = fibonacci_recursive(n)
+        end_time = time.perf_counter()
+
+        print(f"Recursive Result: {result_recursive}")
+        print(f"Recursive Time:   {(end_time - start_time):.8f} seconds")
+
+    except ValueError:
+        print("Invalid input! Please enter a valid integer.")
+
+
+if __name__ == "__main__":
+    main()

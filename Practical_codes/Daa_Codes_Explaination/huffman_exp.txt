@@ -1,0 +1,407 @@
+# ===============================================================
+# HUFFMAN ENCODING IN PYTHON
+# Complete Practical Program with Line-by-Line Explanation
+# ===============================================================
+
+import heapq                      # Used to create Min Heap (Priority Queue)
+from collections import Counter   # Used to count character frequencies automatically
+
+# ===============================================================
+# NODE CLASS
+# Represents each node in the Huffman Tree
+# ===============================================================
+
+class Node:
+    
+    def __init__(self, char, freq):
+        self.char = char          # Character stored in the node
+        self.freq = freq          # Frequency of the character
+        
+        self.left = None          # Left child
+        self.right = None         # Right child
+
+    def __lt__(self, other):
+        # Heap compares nodes using frequency
+        return self.freq < other.freq
+
+
+# ===============================================================
+# BUILD HUFFMAN TREE
+# ===============================================================
+
+def build_tree(frequencies):
+
+    # Create a node for each character-frequency pair
+    heap = [Node(char, freq) for char, freq in frequencies.items()]
+
+    # Convert list into Min Heap
+    heapq.heapify(heap)
+
+    # Continue until only one root node remains
+    while len(heap) > 1:
+
+        # Remove the two smallest frequency nodes
+        left = heapq.heappop(heap)
+        right = heapq.heappop(heap)
+
+        # Create new internal node
+        merged = Node(None, left.freq + right.freq)
+
+        # Assign children
+        merged.left = left
+        merged.right = right
+
+        # Insert merged node back into heap
+        heapq.heappush(heap, merged)
+
+    # Return root node
+    return heap[0] if heap else None
+
+
+# ===============================================================
+# GENERATE HUFFMAN CODES
+# ===============================================================
+
+def get_codes(node, prefix="", codes=None):
+
+    # Create empty dictionary first time
+    if codes is None:
+        codes = {}
+
+    if node:
+
+        # If leaf node found
+        if node.char is not None:
+            codes[node.char] = prefix
+
+        # Move left and append 0
+        get_codes(node.left, prefix + "0", codes)
+
+        # Move right and append 1
+        get_codes(node.right, prefix + "1", codes)
+
+    return codes
+
+
+# ===============================================================
+# DECODE BINARY STRING BACK TO ORIGINAL TEXT
+# ===============================================================
+
+def decode(encoded_text, root):
+
+    result = []           # Stores decoded characters
+
+    current = root        # Start from root
+
+    for bit in encoded_text:
+
+        # Traverse tree according to bit
+        if bit == "0":
+            current = current.left
+        else:
+            current = current.right
+
+        # Character reached
+        if current.char is not None:
+
+            result.append(current.char)
+
+            # Return to root for next character
+            current = root
+
+    return "".join(result)
+
+
+# ===============================================================
+# MAIN FUNCTION
+# ===============================================================
+
+def main():
+
+    print("\n========== HUFFMAN ENCODING ==========\n")
+
+    # User chooses input method
+    choice = input(
+        "1. Plain String Text\n"
+        "2. Frequencies (A:12, B:15)\n\n"
+        "Enter Choice (1/2): "
+    ).strip()
+
+    # -----------------------------------------------------------
+    # OPTION 1 : TEXT INPUT
+    # -----------------------------------------------------------
+
+    if choice == "1":
+
+        text = input("\nEnter Text: ")
+
+        if not text:
+            print("Empty Input!")
+            return
+
+        # Count frequencies automatically
+        frequencies = Counter(text)
+
+        print("\nCharacter Frequencies:")
+        print(frequencies)
+
+        # Build tree
+        root = build_tree(frequencies)
+
+        # Generate Huffman codes
+        codes = get_codes(root)
+
+        # Encode text
+        encoded_text = "".join(codes[ch] for ch in text)
+
+        print("\nEncoded Binary:")
+        print(encoded_text)
+
+        print("\nDecoded Check:")
+        print(decode(encoded_text, root))
+
+    # -----------------------------------------------------------
+    # OPTION 2 : MANUAL FREQUENCY INPUT
+    # -----------------------------------------------------------
+
+    elif choice == "2":
+
+        data = input(
+            "\nEnter Frequencies:\n"
+            "(Example: A:12, B:15, C:7, D:13)\n\n"
+            "Input: "
+        )
+
+        try:
+
+            # Convert user input into dictionary
+            freqs = {
+                k.strip(): int(v)
+                for k, v in (
+                    pair.split(":")
+                    for pair in data.split(",")
+                )
+            }
+
+            # Build tree
+            root = build_tree(freqs)
+
+            # Generate codes
+            codes = get_codes(root)
+
+        except ValueError:
+
+            print("Invalid Format!")
+            return
+
+    else:
+
+        print("Invalid Choice!")
+        return
+
+    # -----------------------------------------------------------
+    # DISPLAY HUFFMAN CODES
+    # -----------------------------------------------------------
+
+    print("\n========== HUFFMAN CODES ==========\n")
+
+    for char, code in sorted(
+        codes.items(),
+        key=lambda x: len(x[1])
+    ):
+        print(f"'{char}' : {code}")
+
+    print("\n===================================\n")
+
+
+# ===============================================================
+# PROGRAM STARTS HERE
+# ===============================================================
+
+if __name__ == "__main__":
+    main()
+
+
+# ===============================================================
+# SAMPLE INPUT / OUTPUT - 1
+# ===============================================================
+
+"""
+INPUT:
+
+1
+HELLO
+
+OUTPUT:
+
+Character Frequencies:
+{'H':1,'E':1,'L':2,'O':1}
+
+Encoded Binary:
+1001010011
+
+Decoded Check:
+HELLO
+
+Huffman Codes:
+
+'L' : 0
+'O' : 11
+'H' : 100
+'E' : 101
+"""
+
+# ===============================================================
+# SAMPLE INPUT / OUTPUT - 2
+# ===============================================================
+
+"""
+INPUT:
+
+2
+
+A:12, B:15, C:7, D:13, E:9
+
+
+OUTPUT (may vary):
+
+'A' : 00
+'B' : 11
+'C' : 010
+'D' : 10
+'E' : 011
+"""
+
+# ===============================================================
+# VIVA QUESTIONS AND ANSWERS
+# ===============================================================
+
+"""
+Q1. What is Huffman Coding?
+Ans:
+A lossless data compression algorithm that assigns
+shorter binary codes to frequently occurring characters.
+
+----------------------------------------------------
+
+Q2. Why is Huffman Coding lossless?
+Ans:
+Original data can be perfectly reconstructed.
+
+----------------------------------------------------
+
+Q3. Which data structure is used?
+Ans:
+Min Heap (Priority Queue).
+
+----------------------------------------------------
+
+Q4. Why use Heap?
+Ans:
+To efficiently obtain two minimum-frequency nodes.
+
+----------------------------------------------------
+
+Q5. What is the time complexity?
+Ans:
+O(n log n)
+
+----------------------------------------------------
+
+Q6. What is a leaf node?
+Ans:
+Node that contains an actual character.
+
+----------------------------------------------------
+
+Q7. What is an internal node?
+Ans:
+Node created after merging two nodes.
+
+----------------------------------------------------
+
+Q8. Purpose of __lt__()?
+Ans:
+Allows heap to compare Node objects by frequency.
+
+----------------------------------------------------
+
+Q9. What is prefix code?
+Ans:
+No code is the prefix of another code.
+
+----------------------------------------------------
+
+Q10. Role of Counter?
+Ans:
+Counts frequency of characters automatically.
+
+----------------------------------------------------
+
+Q11. What are left and right edges represented by?
+Ans:
+Left = 0
+Right = 1
+
+----------------------------------------------------
+
+Q12. Root node frequency equals?
+Ans:
+Sum of all character frequencies.
+
+----------------------------------------------------
+
+Q13. Advantages?
+Ans:
+1. Lossless
+2. Efficient
+3. Reduces storage
+4. Fast decoding
+
+----------------------------------------------------
+
+Q14. Disadvantages?
+Ans:
+1. Tree overhead
+2. Frequency table required
+3. Less efficient for equal frequencies
+
+----------------------------------------------------
+
+Q15. Applications?
+Ans:
+ZIP
+PNG
+JPEG
+File Compression
+
+----------------------------------------------------
+
+Q16. What is Huffman Tree?
+Ans:
+Binary tree used to generate optimal prefix codes.
+
+----------------------------------------------------
+
+Q17. Why are frequent characters assigned shorter codes?
+Ans:
+To reduce overall storage size.
+
+----------------------------------------------------
+
+Q18. Is Huffman Coding greedy?
+Ans:
+Yes.
+
+----------------------------------------------------
+
+Q19. What is decoding?
+Ans:
+Converting encoded binary data back into original text.
+
+----------------------------------------------------
+
+Q20. Which algorithm category does Huffman belong to?
+Ans:
+Greedy Algorithm.
+"""

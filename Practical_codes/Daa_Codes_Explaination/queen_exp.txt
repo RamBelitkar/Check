@@ -1,0 +1,273 @@
+1. CODE WITH RIGHT-HAND EXPLANATION
+def solve_n_queens_fixed_first(n, first_col):      # Function to solve N-Queens with first queen fixed
+
+    board = [[0] * n for _ in range(n)]           # Create n×n board filled with 0
+
+    board[0][first_col] = 1                       # Place first queen in Row 0
+
+    cols = {first_col}                            # Store occupied columns
+
+    diag1 = {0 - first_col}                       # Store left diagonals (row-col)
+
+    diag2 = {0 + first_col}                       # Store right diagonals (row+col)
+
+    def backtrack(row):                           # Recursive Backtracking function
+
+        if row == n:                              # All queens placed successfully
+            return True
+
+        if row == 0:                              # First queen already placed
+            return backtrack(row + 1)
+
+        for col in range(n):                      # Try every column
+
+            if (col in cols or                   # Same column attack
+                (row - col) in diag1 or          # Left diagonal attack
+                (row + col) in diag2):           # Right diagonal attack
+                continue
+
+            board[row][col] = 1                  # Place queen
+
+            cols.add(col)                        # Mark column occupied
+
+            diag1.add(row - col)                 # Mark left diagonal occupied
+
+            diag2.add(row + col)                 # Mark right diagonal occupied
+
+            if backtrack(row + 1):               # Recur for next row
+                return True
+
+            board[row][col] = 0                  # Remove queen (Backtrack)
+
+            cols.remove(col)                     # Free column
+
+            diag1.remove(row - col)              # Free diagonal
+
+            diag2.remove(row + col)              # Free diagonal
+
+        return False                             # No valid position found
+
+    success = backtrack(0)                       # Start solving
+
+    return board if success else None            # Return board if solution exists
+
+
+def print_board(board):                          # Function to print board
+
+    if not board:                                # No solution condition
+
+        print("No valid configuration found")
+        return
+
+    n = len(board)                               # Get board size
+
+    print(f"\nFinal {n}x{n} Queens Matrix:")
+
+    print("-" * (n * 4 + 1))
+
+    for row in board:                            # Print each row
+
+        print(
+            "| " +
+            " | ".join(
+                "Q" if cell == 1 else "."
+                for cell in row
+            ) +
+            " |"
+        )
+
+        print("-" * (n * 4 + 1))
+
+
+def main():
+
+    print(
+        "=== n-Queens Problem with Pre-placed First Queen ==="
+    )
+
+    n = int(
+        input("Enter board size n: ")
+    )
+
+    first_col = int(
+        input(f"Enter first queen column (0-{n-1}): ")
+    )
+
+    result_board = solve_n_queens_fixed_first(
+        n,
+        first_col
+    )
+
+    print_board(result_board)
+
+
+if __name__ == "__main__":                      # Program execution starts
+    main()
+
+2. SAMPLE INPUT
+Input
+Enter board size n: 4
+
+Enter first queen column (0-3): 1
+
+3. SAMPLE OUTPUT
+Final 4x4 Queens Matrix:
+-----------------
+| . | Q | . | . |
+-----------------
+| . | . | . | Q |
+-----------------
+| Q | . | . | . |
+-----------------
+| . | . | Q | . |
+-----------------
+
+Matrix Representation
+0 1 0 0
+0 0 0 1
+1 0 0 0
+0 0 1 0
+
+
+where
+
+1 = Queen
+0 = Empty Position
+
+4. STATE SPACE TREE (DRAW IN PRACTICAL)
+                       Q(0,1)
+                           |
+                       Q(1,3)
+                           |
+                       Q(2,0)
+                           |
+                       Q(3,2)
+                           |
+                        SOLUTION
+
+5. TIME COMPLEXITY ANALYSIS
+Worst Case Time Complexity
+O(N!)
+
+
+Reason:
+
+Row 1 -> N choices
+Row 2 -> N-1 choices
+Row 3 -> N-2 choices
+...
+
+
+Therefore:
+
+N × (N−1) × (N−2) × ... × 1
+
+= O(N!)
+
+Space Complexity
+O(N)
+
+
+due to recursion stack and auxiliary sets.
+
+6. VIVA QUESTIONS AND ANSWERS
+Q1. What is N-Queens Problem?
+
+Answer: Place N queens on an N×N chessboard such that no two queens attack each other.
+
+Q2. Which algorithm is used?
+
+Answer: Backtracking.
+
+Q3. What is Backtracking?
+
+Answer: A technique that tries a solution and if it fails, undoes the choice and tries another possibility.
+
+Q4. Why is Backtracking suitable for N-Queens?
+
+Answer: Because invalid placements can be discarded early and alternative positions can be explored.
+
+Q5. When do two queens attack each other?
+
+Answer:
+
+Same Row
+Same Column
+Same Diagonal
+Q6. How are diagonals checked?
+
+Answer:
+
+row - col
+
+
+and
+
+row + col
+
+Q7. Why use sets?
+
+Answer: Sets provide O(1) lookup time for checking occupied columns and diagonals.
+
+Q8. What is the worst-case time complexity?
+
+Answer:
+
+O(N!)
+
+Q9. What is the space complexity?
+
+Answer:
+
+O(N)
+
+Q10. What does cols store?
+
+Answer: Occupied columns.
+
+Q11. What does diag1 store?
+
+Answer: Left diagonals represented by:
+
+row - col
+
+Q12. What does diag2 store?
+
+Answer: Right diagonals represented by:
+
+row + col
+
+Q13. Why is the first queen fixed?
+
+Answer: The problem statement requires the first queen to be pre-placed and remaining queens are arranged using backtracking.
+
+Q14. What is the solution for n=4 and first_col=1?
+
+Answer:
+
+(0,1)
+(1,3)
+(2,0)
+(3,2)
+
+Q15. What is the objective of the N-Queens problem?
+
+Answer: To place N queens so that none can attack another queen.
+
+7. PRACTICAL CONCLUSION
+The N-Queens problem is solved using the Backtracking algorithm.
+The first queen is fixed at a given position and the remaining
+queens are placed row by row while checking for conflicts in
+columns and diagonals. If a conflict occurs, the algorithm
+backtracks and tries another position. The worst-case time
+complexity is O(N!) and space complexity is O(N).
+
+Quick Viva Revision
+
+✅ Algorithm: Backtracking
+ ✅ Example Input: n = 4, first_col = 1
+ ✅ Time Complexity: O(N!)
+ ✅ Space Complexity: O(N)
+ ✅ Solution Positions:
+
+(0,1), (1,3), (2,0), (3,2)
